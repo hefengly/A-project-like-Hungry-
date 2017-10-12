@@ -28,18 +28,24 @@
                 <div class="price">
                   <span class="now">￥{{food.price}}</span><span v-show="food.oldPrice" class="old">￥{{food.oldPrice}}</span>
                 </div>
+                <div class="carcontrol-wrapper">
+                  <cartcontrol :food="food"></cartcontrol>
+                </div>
               </div>
             </li>
           </ul>
         </li>
       </ul>
     </div>
+    <shopcart :select-foods="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></shopcart>  
   </div>
 </template>
 
 <script type="text/acmascript-6">
   import typeIcon from '../typeIcon/typeIcon.vue'
   import BScroll from 'better-scroll'
+  import shopcart from '../../components/shopcart/shopcart.vue'
+  import cartcontrol from '../cartcontrol/cartcontrol.vue'
 
 const ERR_OK = 0;
   export default {
@@ -65,6 +71,18 @@ const ERR_OK = 0;
           }
         }
         return 0;
+      },
+      selectFoods() {
+        let foods = [];
+        this.goods.forEach((good) => {
+          good.foods.forEach((food) => {
+            if(food.count) {
+              foods.push(food);
+              console.log(foods)
+            }
+          });
+        });
+        return foods;
       }
     },
     created() {
@@ -80,7 +98,9 @@ const ERR_OK = 0;
       })
     },
     components: {
-      typeIcon
+      typeIcon,
+      shopcart,
+      cartcontrol
     },
     methods: {
       selecMenu(index) {
@@ -90,7 +110,7 @@ const ERR_OK = 0;
       },
       _initScroll() {
         this.meunScroll = new BScroll(this.$refs.menuWrapper,{click: true})
-        this.foodsScroll = new BScroll(this.$refs.foodsWrapper,{probeType: 3});
+        this.foodsScroll = new BScroll(this.$refs.foodsWrapper,{click: true,probeType: 3});
 
         this.foodsScroll.on('scroll',(pos) => {
           this.scrollY = Math.abs(Math.round(pos.y));
@@ -166,6 +186,7 @@ const ERR_OK = 0;
       .food-item
         display: flex
         margin: 18px
+        position: relative
         padding-bottom: 18px
         border-bottom: 1px solid rgba(7,17,27,0.1)
         &:last-child
@@ -204,4 +225,9 @@ const ERR_OK = 0;
               text-decoration: line-through
               font-size: 10px
               color: rgb(147,153,159)
+          .carcontrol-wrapper
+            position: absolute
+            right: 0
+            bottom: 14px
+            
 </style>
