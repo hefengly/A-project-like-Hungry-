@@ -29,7 +29,7 @@
                   <span class="now">￥{{food.price}}</span><span v-show="food.oldPrice" class="old">￥{{food.oldPrice}}</span>
                 </div>
                 <div class="carcontrol-wrapper">
-                  <cartcontrol :food="food"></cartcontrol>
+                  <cartcontrol :food="food" v-on:listenCartcontrol="_drop"></cartcontrol>
                 </div>
               </div>
             </li>
@@ -37,7 +37,7 @@
         </li>
       </ul>
     </div>
-    <shopcart :select-foods="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></shopcart>  
+    <shopcart :select-foods="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice" ref="theshopcart"></shopcart>  
   </div>
 </template>
 
@@ -78,7 +78,6 @@ const ERR_OK = 0;
           good.foods.forEach((food) => {
             if(food.count) {
               foods.push(food);
-              console.log(foods)
             }
           });
         });
@@ -125,6 +124,11 @@ const ERR_OK = 0;
           height += item.clientHeight;
           this.listHeight.push(height);
         }
+      },
+      _drop(target) {
+        this.$nextTick(() => {
+          this.$refs.theshopcart.drop(target);
+        })
       }
     }
   };

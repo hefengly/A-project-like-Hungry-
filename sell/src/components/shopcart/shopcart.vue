@@ -13,10 +13,26 @@
 						<div class="desc">另需配送费￥{{deliveryPrice}}</div>
         </div>
         <div class="content-right" :class="{'enough':totalPrice>minPrice}">
-          <div class="pay" :class="{'enough':totalPrice>minPrice,'not-enough':totalPrice<minPrice}">
+          <div class="pay" :class="{'enough':totalPrice>=minPrice,'not-enough':totalPrice<minPrice}">
             {{payDesc}}
           </div>
         </div>
+        <div class="ball-container">
+          <div v-for="ball in balls">
+            <transition name="drop" @before-enter="beforeEnter" @enter="enter" @after-enter="afterEnter">
+              <div class="ball" v-show="ball.show">
+                <div class="inner inner-hook">+</div>
+              </div>
+            </transition>
+          </div>
+        </div>
+        <!-- <div class="ball-container">
+          <transition-group name="drop" v-on:before-enter="beforeEnter" v-on:enter="enter" v-on:after-enter="afterEnter">
+          <div v-for="(ball,index) in balls" v-show="ball.show" :key="index" class="ball">
+            <div class="inner inner-hook">+</div>
+          </div>
+          </transition-group>
+        </div> -->
     </div>
   </div>
 </template>
@@ -42,6 +58,37 @@
         default: 0
       }
     },
+    data() {
+      return {
+        balls: [
+          {
+            show:false
+          },
+          {
+            show:false
+          },
+          {
+            show:false
+          },
+          {
+            show:false
+          },
+          {
+            show:false
+          },
+          {
+            show:false
+          },
+          {
+            show:false
+          },
+          {
+            show:false
+          }
+        ],
+        dropBalls:[]
+      }
+    },
     computed: {
       totalPrice() {
         let total = 0;
@@ -65,6 +112,56 @@
           return `还差￥${diff}元起送`;
         }else {
           return '去结算'
+        }
+      }
+    },
+    methods: {
+      drop(el) {
+        for(let i=0;i<this.balls.length; i++) {
+          let ball = this.balls[i];
+          if(!ball.show) {
+            ball.show = true;
+            ball.el = el;
+            this.dropBalls.push(ball);
+            return;
+          }
+        }
+      },
+      beforeEnter(el) {
+        let count = this.balls.length;
+        while (count--) {
+          let ball = this.balls[count];
+          if(ball.show) {
+            let rect = ball.el.getBoundingClientRect();
+            let x = rect.left-32;
+            let y = -(window.innerHeight - rect.top - 40);
+            el.style.display = '';
+            console.log(y)
+            el.style.webkitTransform = `translate3d(0,${y}px,0)`;
+            el.style.transform = `translate3d(0,${y}px,0)`;           
+            let inner = el.getElementsByClassName('inner-hook')[0];
+            inner.style.webkitTransform = `translate3d(${x}px,0,0)`;
+            inner.style.transform = `translate3d(${x}px,0,0)`;                   
+          }
+        }
+      },
+      enter(el) {
+        /* eslint-disable no-unused-vars */
+        let rf = el.offsetHeight;
+        this.$nextTick(() => {
+          el.style.webkitTransform = 'translate3d(0,0,0)';
+          el.style.transform = 'translate3d(0,0,0)';
+          let inner = el.getElementsByClassName('inner-hook')[0];
+          inner.style.webkitTransform = 'translate3d(0,0,0)';
+          inner.style.transform = 'translate3d(0,0,0)';         
+        });
+        
+      },
+      afterEnter(el) {
+        let ball = this.dropBalls.shift();
+        if(ball) {
+          ball.show = false;
+          el.style.display = 'none';
         }
       }
     }
@@ -159,4 +256,21 @@
           &.enough
             background: #00b43c
             color: #fff
+      .ball-container
+        .ball
+          position: fixed
+          left: 32px
+          bottom: 22px
+          z-index: 200
+          transition: all 0.4s cubic-bezier(0.49, -0.29, 0.75, 0.41)
+          .inner
+            width: 20px
+            height:20px
+            border-radius: 50%
+            font-size: 20px
+            text-align: center
+            line-height: 20px
+            background: rgb(0,160,220)
+            color: #fff
+            transition: all 0.4s linear
 </style>
